@@ -1,0 +1,5 @@
+(sym_lib_table
+  (lib (name custom)(type Legacy)(uri /home/k10l/Documents/Programming/AtTiny/Motion_Controlled_BiciBackLight/MoCoBiBa/custom.lib)(options "")(descr ""))
+  (lib (name lm3671mf-2.8)(type Legacy)(uri ${KIPRJMOD}/lm3671mf-2.8.lib)(options "")(descr ""))
+  (lib (name ap9101ck)(type Legacy)(uri ${KIPRJMOD}/ap9101ck.lib)(options "")(descr ""))
+)

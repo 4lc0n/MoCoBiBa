@@ -1,0 +1,3 @@
+(sym_lib_table
+  (lib (name MoCoBiBa_no_charger-rescue)(type Legacy)(uri ${KIPRJMOD}/MoCoBiBa_no_charger-rescue.lib)(options "")(descr ""))
+)

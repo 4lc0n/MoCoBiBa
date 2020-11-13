@@ -1,0 +1,745 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<export version="D">
+  <design>
+    <source>/home/k10l/Documents/Programming/AtTiny/Motion_Controlled_BiciBackLight/MoCoBiBa_tiny/MoCoBiBa_no_charger.sch</source>
+    <date>Sa 24 Okt 2020 08:54:38 CEST</date>
+    <tool>Eeschema 5.1.6</tool>
+    <sheet number="1" name="/" tstamps="/">
+      <title_block>
+        <title>MotionControlled Bicicle Backlight</title>
+        <company>jumble</company>
+        <rev>0.1</rev>
+        <date>2020-09-28</date>
+        <source>MoCoBiBa_no_charger.sch</source>
+        <comment number="1" value=""/>
+        <comment number="2" value=""/>
+        <comment number="3" value=""/>
+        <comment number="4" value=""/>
+      </title_block>
+    </sheet>
+  </design>
+  <components>
+    <comp ref="U5">
+      <value>MPU-6500</value>
+      <footprint>Sensor_Motion:InvenSense_QFN-24_3x3mm_P0.4mm</footprint>
+      <libsource lib="MoCoBiBa_no_charger-rescue" part="MPU-6500-custom-MoCoBiBa_no_charger-rescue" description=""/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5F7280D1</tstamp>
+    </comp>
+    <comp ref="U4">
+      <value>LM3671MF-3.3</value>
+      <footprint>Package_TO_SOT_SMD:TSOT-23-5</footprint>
+      <datasheet>https://www.analog.com/media/en/technical-documentation/data-sheets/ADP2108.pdf</datasheet>
+      <libsource lib="MoCoBiBa_no_charger-rescue" part="LM3671MF-2.8-lm3671mf-2.8-MoCoBiBa_no_charger-rescue" description=""/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5F7485F1</tstamp>
+    </comp>
+    <comp ref="L1">
+      <value>2.2u</value>
+      <footprint>Inductor_SMD:L_0805_2012Metric_Pad1.15x1.40mm_HandSolder</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="L" description="Inductor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5F748E03</tstamp>
+    </comp>
+    <comp ref="C5">
+      <value>10u</value>
+      <footprint>Capacitor_SMD:C_0805_2012Metric_Pad1.15x1.40mm_HandSolder</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="C_Small" description="Unpolarized capacitor, small symbol"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5F74A3BA</tstamp>
+    </comp>
+    <comp ref="R10">
+      <value>100k</value>
+      <footprint>Resistor_SMD:R_0805_2012Metric_Pad1.15x1.40mm_HandSolder</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5F74AE3D</tstamp>
+    </comp>
+    <comp ref="J2">
+      <value>Battery Connector</value>
+      <footprint>Connector_PinSocket_2.54mm:PinSocket_1x02_P2.54mm_Vertical</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Connector" part="Conn_01x02_Male" description="Generic connector, single row, 01x02, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5F7539AB</tstamp>
+    </comp>
+    <comp ref="C4">
+      <value>0.1u</value>
+      <footprint>Capacitor_SMD:C_0805_2012Metric_Pad1.15x1.40mm_HandSolder</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="C_Small" description="Unpolarized capacitor, small symbol"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5F7D393F</tstamp>
+    </comp>
+    <comp ref="C3">
+      <value>10n</value>
+      <footprint>Capacitor_SMD:C_0805_2012Metric_Pad1.15x1.40mm_HandSolder</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="C_Small" description="Unpolarized capacitor, small symbol"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5F7D3DC0</tstamp>
+    </comp>
+    <comp ref="C6">
+      <value>0.1u</value>
+      <footprint>Capacitor_SMD:C_0805_2012Metric_Pad1.15x1.40mm_HandSolder</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="C_Small" description="Unpolarized capacitor, small symbol"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5F7DA892</tstamp>
+    </comp>
+    <comp ref="J3">
+      <value>AVR-ISP-6</value>
+      <footprint>Connector_PinSocket_2.54mm:PinSocket_2x03_P2.54mm_Vertical</footprint>
+      <datasheet> ~</datasheet>
+      <libsource lib="Connector" part="AVR-ISP-6" description="Atmel 6-pin ISP connector"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5F7F1F43</tstamp>
+    </comp>
+    <comp ref="D4">
+      <value>LED 8-4500</value>
+      <footprint>LED_SMD:LED_PLCC-2</footprint>
+      <datasheet>https://cdn-reichelt.de/documents/datenblatt/A500/LED8-4500RT%23KIN.pdf</datasheet>
+      <libsource lib="Device" part="LED_Small" description="Light emitting diode, small symbol"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5F7509F3</tstamp>
+    </comp>
+    <comp ref="D3">
+      <value>LED 8-4500</value>
+      <footprint>LED_SMD:LED_PLCC-2</footprint>
+      <datasheet>https://cdn-reichelt.de/documents/datenblatt/A500/LED8-4500RT%23KIN.pdf</datasheet>
+      <libsource lib="Device" part="LED_Small" description="Light emitting diode, small symbol"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5F76B89E</tstamp>
+    </comp>
+    <comp ref="D2">
+      <value>LED 8-4500</value>
+      <footprint>LED_SMD:LED_PLCC-2</footprint>
+      <datasheet>https://cdn-reichelt.de/documents/datenblatt/A500/LED8-4500RT%23KIN.pdf</datasheet>
+      <libsource lib="Device" part="LED_Small" description="Light emitting diode, small symbol"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5F76C2B4</tstamp>
+    </comp>
+    <comp ref="R8">
+      <value>10k</value>
+      <footprint>Resistor_SMD:R_0805_2012Metric_Pad1.15x1.40mm_HandSolder</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5F78433B</tstamp>
+    </comp>
+    <comp ref="R7">
+      <value>1k</value>
+      <footprint>Resistor_SMD:R_0805_2012Metric_Pad1.15x1.40mm_HandSolder</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5F78B496</tstamp>
+    </comp>
+    <comp ref="R9">
+      <value>5</value>
+      <footprint>Resistor_SMD:R_0815_2038Metric_Pad1.53x4.00mm_HandSolder</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5F7C6565</tstamp>
+    </comp>
+    <comp ref="R12">
+      <value>R</value>
+      <footprint>Resistor_SMD:R_0805_2012Metric_Pad1.15x1.40mm_HandSolder</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5F91C07D</tstamp>
+    </comp>
+    <comp ref="R11">
+      <value>R</value>
+      <footprint>Resistor_SMD:R_0805_2012Metric_Pad1.15x1.40mm_HandSolder</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5F91C50E</tstamp>
+    </comp>
+    <comp ref="R13">
+      <value>1k</value>
+      <footprint>Resistor_SMD:R_0805_2012Metric_Pad1.15x1.40mm_HandSolder</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5FA26563</tstamp>
+    </comp>
+    <comp ref="R5">
+      <value>100k</value>
+      <footprint>Resistor_SMD:R_0805_2012Metric_Pad1.15x1.40mm_HandSolder</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5F97847D</tstamp>
+    </comp>
+    <comp ref="R4">
+      <value>100k</value>
+      <footprint>Resistor_SMD:R_0805_2012Metric_Pad1.15x1.40mm_HandSolder</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5F963E08</tstamp>
+    </comp>
+    <comp ref="Q1">
+      <value>IRLML2502TRPBF</value>
+      <footprint>digikey-footprints:SOT-23-3</footprint>
+      <datasheet>https://www.infineon.com/dgdl/irlml2502pbf.pdf?fileId=5546d462533600a401535668048e2606</datasheet>
+      <fields>
+        <field name="Category">Discrete Semiconductor Products</field>
+        <field name="DK_Datasheet_Link">https://www.infineon.com/dgdl/irlml2502pbf.pdf?fileId=5546d462533600a401535668048e2606</field>
+        <field name="DK_Detail_Page">/product-detail/en/infineon-technologies/IRLML2502TRPBF/IRLML2502TRPBFCT-ND/812502</field>
+        <field name="Description">MOSFET N-CH 20V 4.2A SOT-23</field>
+        <field name="Digi-Key_PN">IRLML2502TRPBFCT-ND</field>
+        <field name="Family">Transistors - FETs, MOSFETs - Single</field>
+        <field name="MPN">IRLML2502TRPBF</field>
+        <field name="Manufacturer">Infineon Technologies</field>
+        <field name="Status">Active</field>
+      </fields>
+      <libsource lib="dk_Transistors-FETs-MOSFETs-Single" part="IRLML2502TRPBF" description="MOSFET N-CH 20V 4.2A SOT-23"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5F8C610E</tstamp>
+    </comp>
+    <comp ref="D6">
+      <value>LED 8-4500</value>
+      <footprint>LED_SMD:LED_PLCC-2</footprint>
+      <datasheet>https://cdn-reichelt.de/documents/datenblatt/A500/LED8-4500RT%23KIN.pdf</datasheet>
+      <libsource lib="Device" part="LED_Small" description="Light emitting diode, small symbol"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5F8DBD5F</tstamp>
+    </comp>
+    <comp ref="D5">
+      <value>LED 8-4500</value>
+      <footprint>LED_SMD:LED_PLCC-2</footprint>
+      <datasheet>https://cdn-reichelt.de/documents/datenblatt/A500/LED8-4500RT%23KIN.pdf</datasheet>
+      <libsource lib="Device" part="LED_Small" description="Light emitting diode, small symbol"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5F8DC12F</tstamp>
+    </comp>
+    <comp ref="D1">
+      <value>LED 8-4500</value>
+      <footprint>LED_SMD:LED_PLCC-2</footprint>
+      <datasheet>https://cdn-reichelt.de/documents/datenblatt/A500/LED8-4500RT%23KIN.pdf</datasheet>
+      <libsource lib="Device" part="LED_Small" description="Light emitting diode, small symbol"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5F8DC40D</tstamp>
+    </comp>
+    <comp ref="U2">
+      <value>ATtiny84-20PU</value>
+      <footprint>Package_SO:SOIC-14_3.9x8.7mm_P1.27mm</footprint>
+      <datasheet>http://ww1.microchip.com/downloads/en/DeviceDoc/doc8006.pdf</datasheet>
+      <libsource lib="MCU_Microchip_ATtiny" part="ATtiny84-20PU" description="20MHz, 8kB Flash, 512B SRAM, 512B EEPROM, debugWIRE, DIP-14"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5F729DB3</tstamp>
+    </comp>
+    <comp ref="C1">
+      <value>1u</value>
+      <footprint>Capacitor_SMD:C_0805_2012Metric_Pad1.15x1.40mm_HandSolder</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="C_Small" description="Unpolarized capacitor, small symbol"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5F91F0F1</tstamp>
+    </comp>
+    <comp ref="3V3">
+      <value>TestPoint</value>
+      <footprint>TestPoint:TestPoint_Pad_D1.5mm</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Connector" part="TestPoint" description="test point"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5F90F1A7</tstamp>
+    </comp>
+    <comp ref="SCL1">
+      <value>TestPoint</value>
+      <footprint>TestPoint:TestPoint_Pad_D1.5mm</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Connector" part="TestPoint" description="test point"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5F914483</tstamp>
+    </comp>
+    <comp ref="SDA1">
+      <value>TestPoint</value>
+      <footprint>TestPoint:TestPoint_Pad_D1.5mm</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Connector" part="TestPoint" description="test point"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5F916A4C</tstamp>
+    </comp>
+    <comp ref="PB0">
+      <value>TestPoint</value>
+      <footprint>TestPoint:TestPoint_Pad_D1.5mm</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Connector" part="TestPoint" description="test point"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5F917152</tstamp>
+    </comp>
+    <comp ref="PB1">
+      <value>TestPoint</value>
+      <footprint>TestPoint:TestPoint_Pad_D1.5mm</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Connector" part="TestPoint" description="test point"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5F919346</tstamp>
+    </comp>
+    <comp ref="R2">
+      <value>R_PHOTO</value>
+      <footprint>Resistor_THT:R_Axial_DIN0204_L3.6mm_D1.6mm_P2.54mm_Vertical</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="R_PHOTO" description="Photoresistor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5F968D8E</tstamp>
+    </comp>
+    <comp ref="R1">
+      <value>10k</value>
+      <footprint>Resistor_SMD:R_0805_2012Metric_Pad1.15x1.40mm_HandSolder</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5F99FB00</tstamp>
+    </comp>
+  </components>
+  <libparts>
+    <libpart lib="Connector" part="AVR-ISP-6">
+      <description>Atmel 6-pin ISP connector</description>
+      <docs> ~</docs>
+      <footprints>
+        <fp>IDC?Header*2x03*</fp>
+        <fp>Pin?Header*2x03*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">J</field>
+        <field name="Value">AVR-ISP-6</field>
+      </fields>
+      <pins>
+        <pin num="1" name="MISO" type="passive"/>
+        <pin num="2" name="VCC" type="passive"/>
+        <pin num="3" name="SCK" type="passive"/>
+        <pin num="4" name="MOSI" type="passive"/>
+        <pin num="5" name="~RST" type="passive"/>
+        <pin num="6" name="GND" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="Connector" part="Conn_01x02_Male">
+      <description>Generic connector, single row, 01x02, script generated (kicad-library-utils/schlib/autogen/connector/)</description>
+      <docs>~</docs>
+      <footprints>
+        <fp>Connector*:*_1x??_*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">J</field>
+        <field name="Value">Conn_01x02_Male</field>
+      </fields>
+      <pins>
+        <pin num="1" name="Pin_1" type="passive"/>
+        <pin num="2" name="Pin_2" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="Connector" part="TestPoint">
+      <description>test point</description>
+      <docs>~</docs>
+      <footprints>
+        <fp>Pin*</fp>
+        <fp>Test*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">TP</field>
+        <field name="Value">TestPoint</field>
+      </fields>
+      <pins>
+        <pin num="1" name="1" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="Device" part="C_Small">
+      <description>Unpolarized capacitor, small symbol</description>
+      <docs>~</docs>
+      <footprints>
+        <fp>C_*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">C</field>
+        <field name="Value">C_Small</field>
+      </fields>
+      <pins>
+        <pin num="1" name="~" type="passive"/>
+        <pin num="2" name="~" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="Device" part="L">
+      <description>Inductor</description>
+      <docs>~</docs>
+      <footprints>
+        <fp>Choke_*</fp>
+        <fp>*Coil*</fp>
+        <fp>Inductor_*</fp>
+        <fp>L_*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">L</field>
+        <field name="Value">L</field>
+      </fields>
+      <pins>
+        <pin num="1" name="1" type="passive"/>
+        <pin num="2" name="2" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="Device" part="LED_Small">
+      <description>Light emitting diode, small symbol</description>
+      <docs>~</docs>
+      <footprints>
+        <fp>LED*</fp>
+        <fp>LED_SMD:*</fp>
+        <fp>LED_THT:*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">D</field>
+        <field name="Value">LED_Small</field>
+      </fields>
+      <pins>
+        <pin num="1" name="K" type="passive"/>
+        <pin num="2" name="A" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="Device" part="R">
+      <description>Resistor</description>
+      <docs>~</docs>
+      <footprints>
+        <fp>R_*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">R</field>
+        <field name="Value">R</field>
+      </fields>
+      <pins>
+        <pin num="1" name="~" type="passive"/>
+        <pin num="2" name="~" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="Device" part="R_PHOTO">
+      <description>Photoresistor</description>
+      <docs>~</docs>
+      <footprints>
+        <fp>*LDR*</fp>
+        <fp>R?LDR*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">R</field>
+        <field name="Value">R_PHOTO</field>
+      </fields>
+      <pins>
+        <pin num="1" name="~" type="passive"/>
+        <pin num="2" name="~" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="MCU_Microchip_ATtiny" part="ATtiny24V-10PU">
+      <aliases>
+        <alias>ATtiny24-20PU</alias>
+        <alias>ATtiny24A-PU</alias>
+        <alias>ATtiny44V-10PU</alias>
+        <alias>ATtiny44-20PU</alias>
+        <alias>ATtiny44A-PU</alias>
+        <alias>ATtiny84V-10PU</alias>
+        <alias>ATtiny84-20PU</alias>
+        <alias>ATtiny84A-PU</alias>
+      </aliases>
+      <description>10MHz, 2kB Flash, 128B SRAM, 128B EEPROM, debugWIRE, DIP-14</description>
+      <docs>http://ww1.microchip.com/downloads/en/DeviceDoc/doc8006.pdf</docs>
+      <footprints>
+        <fp>DIP*W7.62mm*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">U</field>
+        <field name="Value">ATtiny24V-10PU</field>
+        <field name="Footprint">Package_DIP:DIP-14_W7.62mm</field>
+      </fields>
+      <pins>
+        <pin num="1" name="VCC" type="power_in"/>
+        <pin num="2" name="XTAL1/PB0" type="BiDi"/>
+        <pin num="3" name="XTAL2/PB1" type="BiDi"/>
+        <pin num="4" name="~RESET~/PB3" type="BiDi"/>
+        <pin num="5" name="PB2" type="BiDi"/>
+        <pin num="6" name="PA7" type="BiDi"/>
+        <pin num="7" name="PA6" type="BiDi"/>
+        <pin num="8" name="PA5" type="BiDi"/>
+        <pin num="9" name="PA4" type="BiDi"/>
+        <pin num="10" name="PA3" type="BiDi"/>
+        <pin num="11" name="PA2" type="BiDi"/>
+        <pin num="12" name="PA1" type="BiDi"/>
+        <pin num="13" name="AREF/PA0" type="BiDi"/>
+        <pin num="14" name="GND" type="power_in"/>
+      </pins>
+    </libpart>
+    <libpart lib="MoCoBiBa_no_charger-rescue" part="LM3671MF-2.8-lm3671mf-2.8-MoCoBiBa_no_charger-rescue">
+      <footprints>
+        <fp>TSOT?23*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">U</field>
+        <field name="Value">LM3671MF-2.8-lm3671mf-2.8-MoCoBiBa_no_charger-rescue</field>
+        <field name="Footprint">Package_TO_SOT_SMD:TSOT-23-5</field>
+      </fields>
+      <pins>
+        <pin num="1" name="Vin" type="power_in"/>
+        <pin num="2" name="GND" type="power_in"/>
+        <pin num="3" name="EN" type="input"/>
+        <pin num="4" name="FB" type="input"/>
+        <pin num="5" name="SW" type="power_out"/>
+      </pins>
+    </libpart>
+    <libpart lib="MoCoBiBa_no_charger-rescue" part="MPU-6500-custom-MoCoBiBa_no_charger-rescue">
+      <fields>
+        <field name="Reference">U</field>
+        <field name="Value">MPU-6500-custom-MoCoBiBa_no_charger-rescue</field>
+      </fields>
+      <pins>
+        <pin num="1" name="NC" type="NotConnected"/>
+        <pin num="2" name="NC" type="NotConnected"/>
+        <pin num="3" name="NC" type="NotConnected"/>
+        <pin num="4" name="NC" type="NotConnected"/>
+        <pin num="5" name="NC" type="NotConnected"/>
+        <pin num="6" name="NC" type="NotConnected"/>
+        <pin num="7" name="AUX_CL" type="output"/>
+        <pin num="8" name="VDDIO" type="power_in"/>
+        <pin num="9" name="AD0/SD0" type="BiDi"/>
+        <pin num="10" name="REGOUT" type="passive"/>
+        <pin num="11" name="FSYNC" type="input"/>
+        <pin num="12" name="INT" type="output"/>
+        <pin num="13" name="VDD" type="power_in"/>
+        <pin num="14" name="NC" type="NotConnected"/>
+        <pin num="15" name="NC" type="NotConnected"/>
+        <pin num="16" name="NC" type="NotConnected"/>
+        <pin num="17" name="NC_" type="NotConnected"/>
+        <pin num="18" name="GND" type="power_in"/>
+        <pin num="19" name="RESV" type="NotConnected"/>
+        <pin num="20" name="RESV" type="power_in"/>
+        <pin num="21" name="AUX_DA" type="BiDi"/>
+        <pin num="22" name="nCS" type="input"/>
+        <pin num="23" name="SCL/SCLK" type="input"/>
+        <pin num="24" name="SDA/SDI" type="BiDi"/>
+      </pins>
+    </libpart>
+    <libpart lib="dk_Transistors-FETs-MOSFETs-Single" part="IRLML2502TRPBF">
+      <description>MOSFET N-CH 20V 4.2A SOT-23</description>
+      <docs>https://www.infineon.com/dgdl/irlml2502pbf.pdf?fileId=5546d462533600a401535668048e2606</docs>
+      <fields>
+        <field name="Reference">Q</field>
+        <field name="Value">IRLML2502TRPBF</field>
+        <field name="Footprint">digikey-footprints:SOT-23-3</field>
+        <field name="Datasheet">https://www.infineon.com/dgdl/irlml2502pbf.pdf?fileId=5546d462533600a401535668048e2606</field>
+        <field name="Digi-Key_PN">IRLML2502TRPBFCT-ND</field>
+        <field name="MPN">IRLML2502TRPBF</field>
+        <field name="Category">Discrete Semiconductor Products</field>
+        <field name="Family">Transistors - FETs, MOSFETs - Single</field>
+        <field name="DK_Datasheet_Link">https://www.infineon.com/dgdl/irlml2502pbf.pdf?fileId=5546d462533600a401535668048e2606</field>
+        <field name="DK_Detail_Page">/product-detail/en/infineon-technologies/IRLML2502TRPBF/IRLML2502TRPBFCT-ND/812502</field>
+        <field name="Description">MOSFET N-CH 20V 4.2A SOT-23</field>
+        <field name="Manufacturer">Infineon Technologies</field>
+        <field name="Status">Active</field>
+      </fields>
+      <pins>
+        <pin num="1" name="G" type="BiDi"/>
+        <pin num="2" name="S" type="BiDi"/>
+        <pin num="3" name="D" type="BiDi"/>
+      </pins>
+    </libpart>
+  </libparts>
+  <libraries>
+    <library logical="Connector">
+      <uri>/usr/share/kicad/library//Connector.lib</uri>
+    </library>
+    <library logical="Device">
+      <uri>/usr/share/kicad/library//Device.lib</uri>
+    </library>
+    <library logical="MCU_Microchip_ATtiny">
+      <uri>/usr/share/kicad/library//MCU_Microchip_ATtiny.lib</uri>
+    </library>
+    <library logical="MoCoBiBa_no_charger-rescue">
+      <uri>/home/k10l/Documents/Programming/AtTiny/Motion_Controlled_BiciBackLight/MoCoBiBa_tiny/MoCoBiBa_no_charger-rescue.lib</uri>
+    </library>
+    <library logical="dk_Transistors-FETs-MOSFETs-Single">
+      <uri>/home/k10l/Documents/KiCAD/digikey/digikey-kicad-library-master/digikey-symbols/dk_Transistors-FETs-MOSFETs-Single.lib</uri>
+    </library>
+  </libraries>
+  <nets>
+    <net code="1" name="Net-(R4-Pad2)">
+      <node ref="R4" pin="2"/>
+      <node ref="U2" pin="12"/>
+      <node ref="R5" pin="1"/>
+    </net>
+    <net code="2" name="Net-(Q1-Pad1)">
+      <node ref="R7" pin="2"/>
+      <node ref="R8" pin="1"/>
+      <node ref="Q1" pin="1"/>
+    </net>
+    <net code="3" name="Net-(Q1-Pad3)">
+      <node ref="R9" pin="2"/>
+      <node ref="Q1" pin="3"/>
+    </net>
+    <net code="4" name="VCC">
+      <node ref="R1" pin="1"/>
+      <node ref="U4" pin="1"/>
+      <node ref="R10" pin="2"/>
+      <node ref="J2" pin="1"/>
+      <node ref="R4" pin="1"/>
+    </net>
+    <net code="5" name="GND">
+      <node ref="U4" pin="2"/>
+      <node ref="C3" pin="2"/>
+      <node ref="R13" pin="2"/>
+      <node ref="C4" pin="2"/>
+      <node ref="C1" pin="2"/>
+      <node ref="J2" pin="2"/>
+      <node ref="C5" pin="2"/>
+      <node ref="U5" pin="18"/>
+      <node ref="U5" pin="20"/>
+      <node ref="J3" pin="6"/>
+      <node ref="C6" pin="2"/>
+      <node ref="U2" pin="14"/>
+      <node ref="Q1" pin="2"/>
+      <node ref="R8" pin="2"/>
+    </net>
+    <net code="6" name="Accel_Int">
+      <node ref="U5" pin="12"/>
+      <node ref="U2" pin="13"/>
+    </net>
+    <net code="7" name="+3V3">
+      <node ref="C5" pin="1"/>
+      <node ref="D2" pin="2"/>
+      <node ref="D3" pin="2"/>
+      <node ref="D4" pin="2"/>
+      <node ref="C6" pin="1"/>
+      <node ref="L1" pin="2"/>
+      <node ref="U5" pin="22"/>
+      <node ref="U5" pin="13"/>
+      <node ref="J3" pin="2"/>
+      <node ref="U4" pin="4"/>
+      <node ref="U5" pin="8"/>
+      <node ref="C3" pin="1"/>
+      <node ref="D6" pin="2"/>
+      <node ref="C1" pin="1"/>
+      <node ref="R12" pin="1"/>
+      <node ref="D1" pin="2"/>
+      <node ref="3V3" pin="1"/>
+      <node ref="R11" pin="1"/>
+      <node ref="D5" pin="2"/>
+      <node ref="U2" pin="1"/>
+    </net>
+    <net code="8" name="SCK_ISP">
+      <node ref="R12" pin="2"/>
+      <node ref="U5" pin="23"/>
+      <node ref="J3" pin="3"/>
+      <node ref="SCL1" pin="1"/>
+      <node ref="U2" pin="9"/>
+    </net>
+    <net code="9" name="Net-(D1-Pad1)">
+      <node ref="D5" pin="1"/>
+      <node ref="D4" pin="1"/>
+      <node ref="D6" pin="1"/>
+      <node ref="D1" pin="1"/>
+      <node ref="D2" pin="1"/>
+      <node ref="D3" pin="1"/>
+      <node ref="R9" pin="1"/>
+    </net>
+    <net code="10" name="LED_PWM">
+      <node ref="U2" pin="5"/>
+      <node ref="R7" pin="1"/>
+    </net>
+    <net code="11" name="Net-(R13-Pad1)">
+      <node ref="U5" pin="9"/>
+      <node ref="R13" pin="1"/>
+    </net>
+    <net code="12" name="Net-(C4-Pad1)">
+      <node ref="U5" pin="10"/>
+      <node ref="C4" pin="1"/>
+    </net>
+    <net code="13" name="Net-(U2-Pad6)">
+      <node ref="U2" pin="6"/>
+    </net>
+    <net code="14" name="Net-(R2-Pad2)">
+      <node ref="U2" pin="11"/>
+      <node ref="R2" pin="2"/>
+      <node ref="R5" pin="2"/>
+    </net>
+    <net code="15" name="Net-(R1-Pad2)">
+      <node ref="R2" pin="1"/>
+      <node ref="R1" pin="2"/>
+      <node ref="U2" pin="10"/>
+    </net>
+    <net code="16" name="Net-(PB1-Pad1)">
+      <node ref="PB1" pin="1"/>
+      <node ref="U2" pin="3"/>
+    </net>
+    <net code="17" name="Net-(PB0-Pad1)">
+      <node ref="U2" pin="2"/>
+      <node ref="PB0" pin="1"/>
+    </net>
+    <net code="18" name="Net-(U5-Pad14)">
+      <node ref="U5" pin="14"/>
+    </net>
+    <net code="19" name="Net-(U5-Pad15)">
+      <node ref="U5" pin="15"/>
+    </net>
+    <net code="20" name="Net-(U5-Pad16)">
+      <node ref="U5" pin="16"/>
+    </net>
+    <net code="21" name="Net-(U5-Pad17)">
+      <node ref="U5" pin="17"/>
+    </net>
+    <net code="22" name="Net-(R10-Pad1)">
+      <node ref="U4" pin="3"/>
+      <node ref="R10" pin="1"/>
+    </net>
+    <net code="23" name="Net-(U5-Pad21)">
+      <node ref="U5" pin="21"/>
+    </net>
+    <net code="24" name="Net-(U5-Pad11)">
+      <node ref="U5" pin="11"/>
+    </net>
+    <net code="25" name="Net-(U5-Pad7)">
+      <node ref="U5" pin="7"/>
+    </net>
+    <net code="26" name="Net-(U5-Pad19)">
+      <node ref="U5" pin="19"/>
+    </net>
+    <net code="27" name="Net-(U5-Pad6)">
+      <node ref="U5" pin="6"/>
+    </net>
+    <net code="28" name="Net-(U5-Pad5)">
+      <node ref="U5" pin="5"/>
+    </net>
+    <net code="29" name="Net-(U5-Pad4)">
+      <node ref="U5" pin="4"/>
+    </net>
+    <net code="30" name="Net-(U5-Pad3)">
+      <node ref="U5" pin="3"/>
+    </net>
+    <net code="31" name="Net-(U5-Pad2)">
+      <node ref="U5" pin="2"/>
+    </net>
+    <net code="32" name="Net-(U5-Pad1)">
+      <node ref="U5" pin="1"/>
+    </net>
+    <net code="33" name="Net-(L1-Pad1)">
+      <node ref="U4" pin="5"/>
+      <node ref="L1" pin="1"/>
+    </net>
+    <net code="34" name="MISO_ISP">
+      <node ref="U2" pin="8"/>
+      <node ref="J3" pin="1"/>
+    </net>
+    <net code="35" name="nRES_ISP">
+      <node ref="U2" pin="4"/>
+      <node ref="J3" pin="5"/>
+    </net>
+    <net code="36" name="MOSI_ISP">
+      <node ref="J3" pin="4"/>
+      <node ref="R11" pin="2"/>
+      <node ref="SDA1" pin="1"/>
+      <node ref="U5" pin="24"/>
+      <node ref="U2" pin="7"/>
+    </net>
+  </nets>
+</export>
