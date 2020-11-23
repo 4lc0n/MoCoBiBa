@@ -1,18 +1,20 @@
-
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
-    <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    </head>
-    <body>
-    <h1>/home/k10l/Documents/Programming/AtTiny/Motion_Controlled_BiciBackLight/MoCoBiBa_tiny/MoCoBiBa_no_charger.sch</h1>
-    <p>Sa 24 Okt 2020 08:54:38 CEST</p>
-    <p>Eeschema 5.1.6</p>
-    <p><b>Component Count:</b>34</p>
-    <table>
-    <tr><th style='width:640px'>Ref</th><th>Qnty</th><th>Value</th><th>Part</th><th>Datasheet</th><th>Description</th><th>Vendor</th></tr><tr><td>3V3, PB0, PB1, SCL1, SDA1</td><td>5</td><td>TestPoint</td><td>Connector:TestPoint</td><td>~</td><td>test point</td><td></td></tr><tr><td>C1</td><td>1</td><td>1u</td><td>Device:C_Small</td><td>~</td><td>Unpolarized capacitor, small symbol</td><td></td></tr><tr><td>C3</td><td>1</td><td>10n</td><td>Device:C_Small</td><td>~</td><td>Unpolarized capacitor, small symbol</td><td></td></tr><tr><td>C4, C6</td><td>2</td><td>0.1u</td><td>Device:C_Small</td><td>~</td><td>Unpolarized capacitor, small symbol</td><td></td></tr><tr><td>C5</td><td>1</td><td>10u</td><td>Device:C_Small</td><td>~</td><td>Unpolarized capacitor, small symbol</td><td></td></tr><tr><td>D1, D2, D3, D4, D5, D6</td><td>6</td><td>LED 8-4500</td><td>Device:LED_Small</td><td>https://cdn-reichelt.de/documents/datenblatt/A500/LED8-4500RT%23KIN.pdf</td><td>Light emitting diode, small symbol</td><td></td></tr><tr><td>J2</td><td>1</td><td>Battery Connector</td><td>Connector:Conn_01x02_Male</td><td>~</td><td>Generic connector, single row, 01x02, script generated (kicad-library-utils/schlib/autogen/connector/)</td><td></td></tr><tr><td>J3</td><td>1</td><td>AVR-ISP-6</td><td>Connector:AVR-ISP-6</td><td> ~</td><td>Atmel 6-pin ISP connector</td><td></td></tr><tr><td>L1</td><td>1</td><td>2.2u</td><td>Device:L</td><td>~</td><td>Inductor</td><td></td></tr><tr><td>Q1</td><td>1</td><td>IRLML2502TRPBF</td><td>dk_Transistors-FETs-MOSFETs-Single:IRLML2502TRPBF</td><td>https://www.infineon.com/dgdl/irlml2502pbf.pdf?fileId=5546d462533600a401535668048e2606</td><td>MOSFET N-CH 20V 4.2A SOT-23</td><td></td></tr><tr><td>R1, R8</td><td>2</td><td>10k</td><td>Device:R</td><td>~</td><td>Resistor</td><td></td></tr><tr><td>R2</td><td>1</td><td>R_PHOTO</td><td>Device:R_PHOTO</td><td>~</td><td>Photoresistor</td><td></td></tr><tr><td>R4, R5, R10</td><td>3</td><td>100k</td><td>Device:R</td><td>~</td><td>Resistor</td><td></td></tr><tr><td>R7, R13</td><td>2</td><td>1k</td><td>Device:R</td><td>~</td><td>Resistor</td><td></td></tr><tr><td>R9</td><td>1</td><td>5</td><td>Device:R</td><td>~</td><td>Resistor</td><td></td></tr><tr><td>R11, R12</td><td>2</td><td>R</td><td>Device:R</td><td>~</td><td>Resistor</td><td></td></tr><tr><td>U2</td><td>1</td><td>ATtiny84-20PU</td><td>MCU_Microchip_ATtiny:ATtiny84-20PU</td><td>http://ww1.microchip.com/downloads/en/DeviceDoc/doc8006.pdf</td><td>20MHz, 8kB Flash, 512B SRAM, 512B EEPROM, debugWIRE, DIP-14</td><td></td></tr><tr><td>U4</td><td>1</td><td>LM3671MF-3.3</td><td>MoCoBiBa_no_charger-rescue:LM3671MF-2.8-lm3671mf-2.8-MoCoBiBa_no_charger-rescue</td><td>https://www.analog.com/media/en/technical-documentation/data-sheets/ADP2108.pdf</td><td></td><td></td></tr><tr><td>U5</td><td>1</td><td>MPU-6500</td><td>MoCoBiBa_no_charger-rescue:MPU-6500-custom-MoCoBiBa_no_charger-rescue</td><td></td><td></td><td></td></tr><!--TABLEROW-->
-    </table>
-    </body>
-</html>
-    
+Reference, Quantity, Value, Footprint, Datasheet, Category, DK_Datasheet_Link, DK_Detail_Page, Description, Digi-Key_PN, Family, MPN, Manufacturer, Status
+PB0 SCL1 SDA1 PB1 3V3 ,5,"TestPoint","TestPoint:TestPoint_Pad_D1.5mm","~"
+C1 ,1,"1u","Capacitor_SMD:C_0805_2012Metric_Pad1.15x1.40mm_HandSolder","~"
+C3 ,1,"10n","Capacitor_SMD:C_0805_2012Metric_Pad1.15x1.40mm_HandSolder","~"
+C4 C6 ,2,"0.1u","Capacitor_SMD:C_0805_2012Metric_Pad1.15x1.40mm_HandSolder","~"
+C5 ,1,"10u","Capacitor_SMD:C_0805_2012Metric_Pad1.15x1.40mm_HandSolder","~"
+D1 D2 D3 D4 D5 D6 ,6,"LED 8-4500","LED_SMD:LED_PLCC-2","https://cdn-reichelt.de/documents/datenblatt/A500/LED8-4500RT%23KIN.pdf"
+J2 ,1,"Battery Connector","Connector_PinSocket_2.54mm:PinSocket_1x02_P2.54mm_Vertical","~"
+J3 ,1,"AVR-ISP-6","Connector_PinSocket_2.54mm:PinSocket_2x03_P2.54mm_Vertical"," ~"
+L1 ,1,"2.2u","Inductor_SMD:L_0805_2012Metric_Pad1.15x1.40mm_HandSolder","~"
+Q1 ,1,"IRLML2502TRPBF","digikey-footprints:SOT-23-3","https://www.infineon.com/dgdl/irlml2502pbf.pdf?fileId=5546d462533600a401535668048e2606","Discrete Semiconductor Products","https://www.infineon.com/dgdl/irlml2502pbf.pdf?fileId=5546d462533600a401535668048e2606","/product-detail/en/infineon-technologies/IRLML2502TRPBF/IRLML2502TRPBFCT-ND/812502","MOSFET N-CH 20V 4.2A SOT-23","IRLML2502TRPBFCT-ND","Transistors - FETs, MOSFETs - Single","IRLML2502TRPBF","Infineon Technologies","Active"
+R4 R5 R10 ,3,"100k","Resistor_SMD:R_0805_2012Metric_Pad1.15x1.40mm_HandSolder","~"
+R11 R12 ,2,"R","Resistor_SMD:R_0805_2012Metric_Pad1.15x1.40mm_HandSolder","~"
+R2 ,1,"R_PHOTO","Resistor_THT:R_Axial_DIN0204_L3.6mm_D1.6mm_P2.54mm_Vertical","~"
+R7 R13 ,2,"1k","Resistor_SMD:R_0805_2012Metric_Pad1.15x1.40mm_HandSolder","~"
+R1 R8 ,2,"10k","Resistor_SMD:R_0805_2012Metric_Pad1.15x1.40mm_HandSolder","~"
+R9 ,1,"5","Resistor_SMD:R_0815_2038Metric_Pad1.53x4.00mm_HandSolder","~"
+U2 ,1,"ATtiny84-20PU","Package_SO:SOIC-14_3.9x8.7mm_P1.27mm","http://ww1.microchip.com/downloads/en/DeviceDoc/doc8006.pdf"
+U4 ,1,"LM3671MF-3.3","Package_TO_SOT_SMD:TSOT-23-5","https://www.analog.com/media/en/technical-documentation/data-sheets/ADP2108.pdf"
+U5 ,1,"MPU-6500","Sensor_Motion:InvenSense_QFN-24_3x3mm_P0.4mm",""

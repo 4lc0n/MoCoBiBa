@@ -2,8 +2,8 @@
 <export version="D">
   <design>
     <source>/home/k10l/Documents/Programming/AtTiny/Motion_Controlled_BiciBackLight/MoCoBiBa_tiny/MoCoBiBa_no_charger.sch</source>
-    <date>Sa 24 Okt 2020 08:54:38 CEST</date>
-    <tool>Eeschema 5.1.6</tool>
+    <date>Fr 13 Nov 2020 20:51:48 CET</date>
+    <tool>Eeschema 5.1.7</tool>
     <sheet number="1" name="/" tstamps="/">
       <title_block>
         <title>MotionControlled Bicicle Backlight</title>
