@@ -1,29 +1,22 @@
-#include <Arduino.h>
-#include <usiTwiMaster.h>
+/*  Motion Controlled Bicicle Backlight
+// Created: 24.11.2020
+// 22:00: Interrupt works
+// 
+// TODO: Power reduction
+// TODO: Sleep-Mode
+// TODO: read Accel fro ACCEL_Z
+// TODO: Monitor Battery Voltage
+// TODO: Monitor Light Conditions
+// TODO: Disable Brownout Detection, if active
+// TODO: low battery warning
+*/
 
-
-#define I2C_READ 1
-#define I2C_WRITE 0
-
-#define LED_PIN PB2
-#define DEBUG_PIN 9
-#define ACCEL_PIN PA0
-
-struct mpu_data{
-  int16_t accel_x;
-  int16_t accel_y;
-  int16_t accel_z;
-  int16_t temp;
-  int16_t gyro_x;
-  int16_t gyro_y;
-  int16_t gyro_z;
-};
-
-
-
-
-const uint8_t mpu_address = 0x68 << 1;
-
+#include <avr/io.h>
+#include <util/delay.h>
+#include <stdint.h>
+#include <stdbool.h>
+#include "main.h"
+#include "usiTwiMaster.h"
 
 // register in order to set to cycle and interrupt on accel_x
 const uint8_t lp_regs[8]  = {107, 108, 29, 56, 57, 31, 30, 107};
@@ -32,6 +25,10 @@ const uint8_t lp_data[8] = {1, 31, 1, 64, 192, 16, 4, 0x29};
 const uint8_t sp_regs[9] = {107, 108, 28, 29, 56, 57, 31, 30, 107};
 const uint8_t sp_data[9] = {1, 31, 1, 0,  64, 192, 16, 8, 0x9};
 
+
+
+// function declarations
+void setup_pins();
 
 bool mpu_set_register(uint8_t reg, uint8_t data);
 bool mpu_get_register(uint8_t reg, uint8_t* data);
@@ -42,48 +39,77 @@ bool mpu_set_sampling();
 bool mpu_read_regs(struct mpu_data *ret_data);
 
 
-void setup() {
-  // put your setup code here, to run once:
-
-  pinMode(LED_PIN, OUTPUT);
-  pinMode(DEBUG_PIN, OUTPUT);
-  digitalWrite(LED_PIN, HIGH);
-  digitalWrite(DEBUG_PIN, LOW);
-  pinMode(ACCEL_PIN, INPUT);
-
+int main()
+{
+  setup_pins();
+ 
   usiTwiMasterInitialize();
-  digitalWrite(DEBUG_PIN, LOW);
+ 
+  LED_PORT |= (0x01 << LED);
+  _delay_ms(100);
+  LED_PORT &= ~(0x01 << LED);
+  _delay_ms(100);
 
-  digitalWrite(LED_PIN, LOW);
   
-
-  if(mpu_set_interrupt())
+  // enable motion interrupt on MPU-6500
+  if(!mpu_set_interrupt())
   {
-    digitalWrite(LED_PIN, HIGH);
-
+    LED_PORT |= (0x01 << LED);
+    _delay_ms(100);
+    LED_PORT &= ~(0x01 << LED);
+    _delay_ms(100);
   }
-  else
+
+
+
+
+  while(1)
   {
-    digitalWrite(LED_PIN, LOW);
+    if(ACC_INT_PIN & (0x01 << ACC_INT))
+    {
+      LED_PORT |= (0x01 << LED);
+    }
+    else
+    {
+      LED_PORT &= ~(0x01 << LED);
+    }
   }
 }
 
-void loop() {
-  if(digitalRead(ACCEL_PIN))
-  {
-    digitalWrite(LED_PIN, HIGH);
 
-  }
-  else
-  {
-    digitalWrite(LED_PIN, LOW);
-  }
-  
+
+void setup_pins()
+{
+
+
+  // set all unconnected pins to a defined level: input, pullup
+  DDRA = 0;
+  DDRB = 0;
+
+  PORTA = 0xFF;
+  PORTB = 0x0F;
+
+
+  // debug pins: PB0 and PB1
+
+  DEBUG0_DDR |= (0x01 << DEBUG0);
+  DEBUG1_DDR |= (0x01 << DEBUG1);
+
+  // set debug pins to low
+  DEBUG0_PORT &= ~(0x01 << DEBUG0);
+  DEBUG1_PORT &= ~(0x01 << DEBUG1);
+
+  // set LED as output, set low
+  LED_DDR |= (0x01 << LED);
+  LED_PORT &= ~(0x01 << LED);
+
+  // set acc_int pin as input, no pullup
+  ACC_INT_DDR &= ~(0x01 << ACC_INT);
+  ACC_INT_PORT &= ~(0x01 << ACC_INT);
+
+
+
 }
-
-
-
-
 
 bool mpu_set_register(uint8_t reg, uint8_t data)
 {
@@ -109,7 +135,7 @@ bool mpu_set_registers(const uint8_t *reg, const uint8_t *data, uint8_t number)
     {
       return false;
     }
-    delayMicroseconds(10);
+    _delay_us(10);
   }
   return true;
 }
@@ -124,7 +150,7 @@ bool mpu_get_registers(uint8_t reg, uint8_t *data, uint8_t number)
   //transmit reg to read from
   if(usiTwiStartTransceiverWithData(msg, 2))
   {
-    delayMicroseconds(50);
+    _delay_us(50);
   }
   else{     //failed to transmit
     return false;
@@ -157,7 +183,7 @@ bool mpu_get_register(uint8_t reg, uint8_t* data)
 
   if(usiTwiStartTransceiverWithData(msg, 2))
   {
-    delayMicroseconds(50);
+    _delay_us(50);
   }
   else{     //failed to transmit
     return false;
@@ -185,7 +211,7 @@ bool mpu_set_interrupt()
   
   //reset MPU unit
   mpu_set_register(107, 0x80);
-  delay(100);
+  _delay_ms(100);
   
   
   if(mpu_set_registers(lp_regs, lp_data, sizeof(lp_regs)))
@@ -206,7 +232,7 @@ bool mpu_set_sampling()
 {
   //reset MPU unit
   mpu_set_register(107, 0x80);
-  delay(100);
+  _delay_ms(100);
 
   // for(uint8_t i = 0; i < 9; i++)
   // {
@@ -217,7 +243,7 @@ bool mpu_set_sampling()
   //   }
   //   else{
   //     //wait for a short period of time to distinquish the data packets on the logic analyzer
-  //     delayMicroseconds(100);
+  //     _delay_us(100);
   //   }
   // }
 
