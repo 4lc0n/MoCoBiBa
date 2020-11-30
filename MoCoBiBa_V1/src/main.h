@@ -6,7 +6,6 @@
 
 
 
-#define F_CPU 1000000UL
 
 
 #define DEBUG0 PB0
@@ -24,13 +23,17 @@
 #define ACC_INT_PORT PORTA
 #define ACC_INT_DDR DDRA
 #define ACC_INT_PIN PINA
-#define V_BATT_PIN PA1
+
+#define V_BATT PA1
+#define V_BATT_PIN PINA
 #define V_BATT_PORT PORTA
 #define V_BATT_DDR DDRA
 #define V_SINK PA2
+#define V_SINK_PIN PINA
 #define V_SINK_PORT PORTA
 #define V_SINK_DDR DDRA
-#define V_LIGHT_PIN PA3
+#define V_LIGHT PA3
+#define V_LIGHT_PIN PINA
 #define V_LIGHT_PORT PORTA
 #define V_LIGHT_DDR DDRA
 
@@ -51,6 +54,15 @@ struct mpu_data{
 
 
 const uint8_t mpu_address = 0x68 << 1;
+
+
+// definitions for configuration
+
+#define DARKNESS_THRESHHOLD_UPPER 512
+#define DARKNESS_THRESHHOLD_LOWER 440
+
+#define MOTION_THRESHHOLD         0.2
+
 
 
 #endif
