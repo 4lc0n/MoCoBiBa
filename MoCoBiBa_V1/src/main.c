@@ -13,6 +13,7 @@
 
 #include <avr/io.h>
 #include <avr/wdt.h>
+#include <avr/sleep.h>
 #include <avr/interrupt.h>
 #include <util/delay.h>
 #include <stdint.h>
@@ -24,24 +25,34 @@
 
 #define F_CPU 1000000UL
 
-// register in order to set to cycle and interrupt on accel_x
-const uint8_t lp_regs[8]  = {107, 108, 29, 56, 57, 31, 30, 107};
-const uint8_t lp_data[8] = {1, 31, 1, 64, 192, 16, 4, 0x29};
+// register in order to set to cycle and interrupt on accel_z // 105 was 57 (dunno why)
+const uint8_t lowpower_regs[8]  = {107, 108, 29,   56, 105, 31, 30, 107};      // only axis x activated, wake on motion activated, sampling at  4 Hz
+const uint8_t lowpower_data[8] = {   1,0x37,  1, 0x40,0xC0, 16,  4, 0x29};
 
-const uint8_t sp_regs[9] = {107, 108, 28, 29, 56, 57, 31, 30, 107};
-const uint8_t sp_data[9] = {1, 31, 1, 0,  64, 192, 16, 8, 0x9};
+// registers in order to set to sampling at 125 Hz, all 3 accel axes
+const uint8_t sampling_regs[9] = {107, 108, 28, 29,  56, 105,   31,  30, 107};   // wake on motion activated, sample-rate: 125, +-2g, gyro deactivated
+const uint8_t sampling_data[9] = {  1,0x07,  1,  0,0x40,0xC0, 0x10,0x08, 0x09};  // disable 
 
-
+const uint8_t sleep_regs[3] = {108, 107, 107};
+const uint8_t sleep_data[3] = {0x3F, 0x08, 0x40};
 
 // variables determing current states:
 bool darkness = false;
 bool motion = false;
 volatile bool sleep = false;
+volatile uint8_t last_motion = 0;
 
+
+uint16_t u16_v_light;
+enum modes {sleepMode, interruptMode, samplingMode};
+enum modes mpu_mode = sleepMode;
 // function declarations
 void setup_watchdog();
 void setup_pins();
+void setup_pwm();
+void disable_pwm();
 void enter_sleep_wdt();
+bool check_for_darkness(bool ndarkness, uint16_t *nv_light);
 
 bool mpu_set_register(uint8_t reg, uint8_t data);
 bool mpu_get_register(uint8_t reg, uint8_t* data);
@@ -49,6 +60,7 @@ bool mpu_set_registers(const uint8_t *reg, const uint8_t *data, uint8_t number);
 bool mpu_get_registers(uint8_t reg, uint8_t *data, uint8_t number);
 bool mpu_set_interrupt();
 bool mpu_set_sampling();
+bool mpu_set_sleep();
 bool mpu_read_regs(struct mpu_data *ret_data);
 uint16_t read_v_batt();
 uint16_t read_v_light();
@@ -67,20 +79,103 @@ int main()
     _delay_ms(100);
   }
  
-  // usiTwiMasterInitialize();
+  usiTwiMasterInitialize();
+  mpu_set_sleep();
+  
+ 
   while(1){
-    check_for_darkness();
+    darkness = check_for_darkness(darkness, &u16_v_light);
     if(darkness)
     {
-      LED_PORT |= (0x01 << LED);
+      // if motion is set to true: sample should already be configured
+      if(motion)
+      {
+        // 
+        if(ACC_INT_PIN & (0x01 << ACC_INT))
+        {
+          last_motion = 60;   // reset last_motion to 60 -> 1 minute timer, reduced by WDT
+          
+        }
+              
 
+        // sample the mpu
+
+        // interprete data with a lpfilter
+
+        // modify timer to either signal braking light or normal light
+        // led pin: OC0A
+
+        // if breaking: 
+        // OCR0A = 255;
+
+        // else:
+         OCR0A = 60;
+
+
+        if(!last_motion)
+        {
+          motion = false;
+          mpu_mode = interruptMode;
+          mpu_set_interrupt();
+          disable_pwm();
+          LED_DDR &= ~(0x01 << LED);
+        }
+      }
+
+
+      // else: motion is false, it is only dark: set interrupt
+      // if motion: go to upper part
+      else {    // motion
+        // if interrupt not set
+        if(mpu_mode != interruptMode)
+        {
+          mpu_set_interrupt();
+          mpu_mode = interruptMode;
+        }
+        
+        // if interrupt pin reads as one
+        if(ACC_INT_PIN & (0x01 << ACC_INT))
+        {
+
+
+          // set motion to true
+          motion = true;
+          // activate mpu to sample at 80 Hz
+          mpu_mode = samplingMode;
+          mpu_set_sampling();
+          last_motion = 60;
+
+          // enable led 
+          // todo: implement timer for pwm
+          setup_pwm();
+          LED_DDR |= (0x01 << LED);
+        }
+        
+        
+      }
     }
     else
     {
-      LED_PORT &= ~(0x01 << LED);
+      if(mpu_mode != sleepMode)
+      {
+        mpu_set_sleep();
+        mpu_mode = sleepMode;
+      }
+      
+      motion = false;
+      
     }
+    
+    if(!motion)
+    {
+       enter_sleep_wdt();
+    }
+    else
+    {
+      _delay_ms(1000);
+      if(last_motion > 0) last_motion--; // reduce last_motion with every interrupt; after 60 seconds of no motion: turn lights off
 
-    enter_sleep_wdt();
+    }
   }
   
 
@@ -100,46 +195,78 @@ void setup_watchdog()
   sei();
 }
 
-void check_for_darkness()
+bool check_for_darkness(bool ndarkness, uint16_t *nv_light)
 {
   uint16_t light_val;
 
   // save satate of LED_PORT
-  uint8_t temp = LED_PORT;
+  uint8_t temp = LED_DDR;
   // disable LEDS
-  LED_PORT &= ~(0x01 << LED);
+  LED_DDR &= ~(0x01 << LED);
 
   //get sample
   light_val = read_v_light();
-  if(!darkness && light_val > DARKNESS_THRESHHOLD_UPPER)
+
+  *nv_light = light_val;
+
+  LED_DDR = temp;
+
+  if(!ndarkness && light_val > DARKNESS_THRESHHOLD_UPPER)
   {
     // v_light above threshhold: it is getting dark (R2 is photoresistor)
-    darkness = true;
+    return true;
   }
-  else if(darkness && light_val < DARKNESS_THRESHHOLD_LOWER)
+  else if(ndarkness && light_val < DARKNESS_THRESHHOLD_LOWER)
   {
     // v_light below lower threshhold: its bright again
-    darkness = false;
+    return false;
+    
   }
+  else
+  {
+    // if no threshhold was passed: return old state
+    return ndarkness;
+  }
+  
+  
 }
 
 void enter_sleep_wdt()
 {
   sleep = true;
 
+  // disable pins for adc
+  DDRA &= ~(0xFE);
+  DDRB &= ~(0x0F);
+
+
+
   // go to sleep
   MCUCR &= ~((0x01 << SM1) | (0x01 << SM0) | (0x01 << SE));
   MCUCR |= (0x01 << SM1) | (0x00 << SM0);
   
   // needs optimisation for power consumption: disable ports, peripheries, mpu, ...
+  // disable  timer 1, usi and adc
+  // keep timer0 alive
+  uint8_t prr_old = PRR;
+  PRR |= (0x01 << PRTIM0) | (0x01 << PRTIM1) | (0x01 << PRUSI) | (0x01 << PRADC);
 
-  // disable brown out detection and go to sleep
-  // uint8_t temp = MCUCR;
-  // MCUCR |= (0x01 << BODS) | (0x01 << BODSE);
-  // MCUCR = temp | (0x01 << BODS);
+
+
+  // disable brown out detection and go to sleep 
+  uint8_t temp = MCUCR;
+  MCUCR |= (0x01 << BODS) | (0x01 << BODSE);
+  MCUCR = temp | (0x01 << BODS);
   MCUCR |= (0x01 << SE);
+  
+  sleep_cpu();
+
   while(sleep == true)
     asm volatile ("nop");
+
+  PRR = prr_old;
+  setup_pins();
+  
 }
 
 void setup_pins()
@@ -183,6 +310,39 @@ void setup_pins()
   
 
 }
+
+
+void setup_pwm()
+{
+  // f_clk = 1e6 Hz
+  // prescaler: 64
+  // f_timer: 61 Hz
+  // enable timer
+  PRR &= ~(0x01 << PRTIM0);
+
+  // enable Output Compare 0 A
+  // fast pwm mode
+  TCCR0A |= (0x01 << COM0A1) | (0x01 << WGM01) | (0x01 << WGM00);
+  TCCR0B |= (0x01 << CS01) | (0x01 << CS00);
+
+  // set compare unit to mid-range
+  OCR0A = 128;
+
+  // no interrupt needed
+
+}
+
+
+void disable_pwm()
+{
+  // disable port function
+  TCCR0A &= ~((0x01 << COM0A1) | (0x01 << COM0A0));
+  TCCR0B = 0;
+  // disable timer in power reduction register
+  PRR |= (0x01 << PRTIM0);
+
+}
+
 
 bool mpu_set_register(uint8_t reg, uint8_t data)
 {
@@ -287,7 +447,7 @@ bool mpu_set_interrupt()
   _delay_ms(100);
   
   
-  if(mpu_set_registers(lp_regs, lp_data, sizeof(lp_regs)))
+  if(mpu_set_registers(lowpower_regs, lowpower_data, sizeof(lowpower_regs)))
   {
     return true;
   }
@@ -309,7 +469,7 @@ bool mpu_set_sampling()
 
   // for(uint8_t i = 0; i < 9; i++)
   // {
-  //   if(!mpu_set_register(sp_regs[i], sp_data[i]))
+  //   if(!mpu_set_register(sampling_regs[i], sampling_data[i]))
   //   {
   //     //failed to transmit
   //     return false;
@@ -320,7 +480,7 @@ bool mpu_set_sampling()
   //   }
   // }
 
-  if(!mpu_set_registers(sp_regs, sp_data, sizeof(sp_regs)))
+  if(!mpu_set_registers(sampling_regs, sampling_data, sizeof(sampling_regs)))
   {
     return false;
   }
@@ -328,6 +488,21 @@ bool mpu_set_sampling()
 
   //everything seemed to work
   return true;
+}
+
+bool mpu_set_sleep()
+{
+    mpu_set_register(107, 0x80);
+  _delay_ms(100);
+
+  // sets the MPU in sleep mode, deactivates all sensors
+  if(!mpu_set_registers(sleep_regs, sleep_data, sizeof(sleep_regs)))
+  {
+    return false;
+  }
+  else{
+    return true;
+  }
 }
 
 
@@ -511,6 +686,8 @@ ISR(WDT_vect)
 {
   // reconfigure registers for interrupt
   WDTCSR |= (0x01 << WDIE) ;
+  MCUCR &= ~(0x01 << SE);
 
+  if(last_motion > 0) last_motion--; // reduce last_motion with every interrupt; after 60 seconds of no motion: turn lights off
   sleep = false;
 }
