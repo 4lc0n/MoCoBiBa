@@ -63,6 +63,8 @@ const uint8_t mpu_address = 0x68 << 1;
 
 #define MOTION_THRESHHOLD         0.2
 
+#define MOTION_TIMEOUT            60
+
 
 
 #endif

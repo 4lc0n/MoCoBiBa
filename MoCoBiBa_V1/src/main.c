@@ -1,13 +1,18 @@
 /*  Motion Controlled Bicicle Backlight
 // Created: 24.11.2020
 // 22:00: Interrupt works
+
+// 02.12.
+// State machine works, sort of
+// BUG: by some chance pin change interrupt on accel_pin always triggers
 // 
-// TODO: Power reduction
-// TODO: Sleep-Mode
+// 
+// DONE: Power reduction
+// DONE: Sleep-Mode
 // TODO: read Accel fro ACCEL_Z
 // TODO: Monitor Battery Voltage
-// TODO: Monitor Light Conditions
-// TODO: Disable Brownout Detection, if active
+// DONE: Monitor Light Conditions
+// DONE: Disable Brownout Detection, if active
 // TODO: low battery warning
 */
 
@@ -23,22 +28,22 @@
 
 
 
-#define F_CPU 1000000UL
+
 
 // register in order to set to cycle and interrupt on accel_z // 105 was 57 (dunno why)
-const uint8_t lowpower_regs[8]  = {107, 108, 29,   56, 105, 31, 30, 107};      // only axis x activated, wake on motion activated, sampling at  4 Hz
-const uint8_t lowpower_data[8] = {   1,0x37,  1, 0x40,0xC0, 16,  4, 0x29};
+const uint8_t lowpower_regs[8]  = {107, 108, 29,   56, 105,  31, 30, 107};      // only axis x activated, wake on motion activated, sampling at  4 Hz
+const uint8_t lowpower_data[8] = {   1,0x37,  5, 0x40,0xC0,0x0B,  4, 0x29};     // threshhold at reg 31
 
 // registers in order to set to sampling at 125 Hz, all 3 accel axes
 const uint8_t sampling_regs[9] = {107, 108, 28, 29,  56, 105,   31,  30, 107};   // wake on motion activated, sample-rate: 125, +-2g, gyro deactivated
-const uint8_t sampling_data[9] = {  1,0x07,  1,  0,0x40,0xC0, 0x10,0x08, 0x09};  // disable 
+const uint8_t sampling_data[9] = {  1,0x07,  1,  0,0x40,0xC0, 0x0B,0x08, 0x09};  // disable 
 
 const uint8_t sleep_regs[3] = {108, 107, 107};
 const uint8_t sleep_data[3] = {0x3F, 0x08, 0x40};
 
 // variables determing current states:
 bool darkness = false;
-bool motion = false;
+volatile bool motion = false;
 volatile bool sleep = false;
 volatile uint8_t last_motion = 0;
 
@@ -52,6 +57,9 @@ void setup_pins();
 void setup_pwm();
 void disable_pwm();
 void enter_sleep_wdt();
+void setup_interrupt_pin();
+void disable_interrupt_pin();
+
 bool check_for_darkness(bool ndarkness, uint16_t *nv_light);
 
 bool mpu_set_register(uint8_t reg, uint8_t data);
@@ -78,6 +86,7 @@ int main()
     LED_PORT &= ~(0x01 << LED);
     _delay_ms(100);
   }
+  _delay_ms(1000);
  
   usiTwiMasterInitialize();
   mpu_set_sleep();
@@ -85,97 +94,194 @@ int main()
  
   while(1){
     darkness = check_for_darkness(darkness, &u16_v_light);
+    
     if(darkness)
+            DEBUG1_PORT |= (0x01 << DEBUG1);
+
+    // if motion and darkness
+    if( motion && darkness)
     {
-      // if motion is set to true: sample should already be configured
-      if(motion)
+      
+
+      if(mpu_mode != samplingMode)
       {
-        // 
-        if(ACC_INT_PIN & (0x01 << ACC_INT))
+        usiTwiMasterInitialize();
+        if(!mpu_set_sampling())
         {
-          last_motion = 60;   // reset last_motion to 60 -> 1 minute timer, reduced by WDT
-          
+          mpu_set_sampling();
+          DEBUG0_PORT |= (0x01 << DEBUG0);
         }
-              
-
-        // sample the mpu
-
-        // interprete data with a lpfilter
-
-        // modify timer to either signal braking light or normal light
-        // led pin: OC0A
-
-        // if breaking: 
-        // OCR0A = 255;
-
-        // else:
-         OCR0A = 60;
-
-
-        if(!last_motion)
-        {
-          motion = false;
-          mpu_mode = interruptMode;
-          mpu_set_interrupt();
-          disable_pwm();
-          LED_DDR &= ~(0x01 << LED);
-        }
+        mpu_mode = samplingMode;
+        setup_pwm();
       }
 
 
-      // else: motion is false, it is only dark: set interrupt
-      // if motion: go to upper part
-      else {    // motion
-        // if interrupt not set
+
+      
+      if(last_motion == 0)
+      {
+        // timed out: no motion in last 60 sec
+        motion = false;
+        disable_pwm();
+      }      
+
+      // sample the mpu
+
+      // interprete data with a lpfilter
+
+      // modify timer to either signal braking light or normal light
+      // led pin: OC0A
+
+      // if breaking: 
+      // OCR0A = 255;
+
+      // else:
+        OCR0A = 60;
+
+      // delay for approx. 125 Hz loop time
+      _delay_ms(100);
+
+    }
+
+    // if not motion, but darkness
+    else {
+      if (darkness)
+      {
+        setup_interrupt_pin();
+        // if mpu not configured yet
         if(mpu_mode != interruptMode)
         {
-          mpu_set_interrupt();
+          usiTwiMasterInitialize();
+          if(!mpu_set_interrupt())
+          { // try again!
+            mpu_set_interrupt();
+            DEBUG0_PORT |= (0x01 << DEBUG0);
+          }
           mpu_mode = interruptMode;
         }
         
-        // if interrupt pin reads as one
-        if(ACC_INT_PIN & (0x01 << ACC_INT))
+
+        // sleep for 1 ms
+        else
         {
-
-
-          // set motion to true
-          motion = true;
-          // activate mpu to sample at 80 Hz
-          mpu_mode = samplingMode;
-          mpu_set_sampling();
-          last_motion = 60;
-
-          // enable led 
-          // todo: implement timer for pwm
-          setup_pwm();
-          LED_DDR |= (0x01 << LED);
+          enter_sleep_wdt();
         }
-        
-        
       }
-    }
-    else
-    {
-      if(mpu_mode != sleepMode)
+
+      // if not motion and not darkness
+      else
       {
-        mpu_set_sleep();
-        mpu_mode = sleepMode;
+        disable_interrupt_pin();
+        if(mpu_mode != sleepMode)
+        {
+          usiTwiMasterInitialize();
+          if(!mpu_set_sleep())
+          { // try again!
+            mpu_set_sleep();
+            DEBUG0_PORT |= (0x01 << DEBUG0);
+          }
+          mpu_mode = sleepMode;
+        }
+
+        // sleep for 1 ms
+        enter_sleep_wdt();
+
       }
-      
-      motion = false;
-      
     }
     
-    if(!motion)
-    {
-       enter_sleep_wdt();
-    }
-    else
-    {
-      _delay_ms(1000);
-      if(last_motion > 0) last_motion--; // reduce last_motion with every interrupt; after 60 seconds of no motion: turn lights off
 
-    }
+
+    // if(darkness)
+    // {
+    //   // if motion is set to true: sample should already be configured
+    //   if(motion)
+    //   {
+    //     // 
+    //     if(ACC_INT_PIN & (0x01 << ACC_INT))
+    //     {
+    //       last_motion = 60;   // reset last_motion to 60 -> 1 minute timer, reduced by WDT
+          
+    //     }
+              
+
+    //     // sample the mpu
+
+    //     // interprete data with a lpfilter
+
+    //     // modify timer to either signal braking light or normal light
+    //     // led pin: OC0A
+
+    //     // if breaking: 
+    //     // OCR0A = 255;
+
+    //     // else:
+    //      OCR0A = 60;
+
+
+    //     if(!last_motion)
+    //     {
+    //       motion = false;
+    //       mpu_mode = interruptMode;
+    //       mpu_set_interrupt();
+    //       disable_pwm();
+    //       LED_DDR &= ~(0x01 << LED);
+    //     }
+    //   }
+
+
+    //   // else: motion is false, it is only dark: set interrupt
+    //   // if motion: go to upper part
+    //   else {    // motion
+    //     // if interrupt not set
+    //     if(mpu_mode != interruptMode)
+    //     {
+    //       mpu_set_interrupt();
+    //       mpu_mode = interruptMode;
+    //     }
+        
+    //     // if interrupt pin reads as one
+    //     if(ACC_INT_PIN & (0x01 << ACC_INT))
+    //     {
+
+
+    //       // set motion to true
+    //       motion = true;
+    //       // activate mpu to sample at 80 Hz
+    //       mpu_mode = samplingMode;
+    //       mpu_set_sampling();
+    //       last_motion = 60;
+
+    //       // enable led 
+    //       // todo: implement timer for pwm
+    //       setup_pwm();
+    //       LED_DDR |= (0x01 << LED);
+    //     }
+        
+        
+    //   }
+    // }
+    // else
+    // {
+    //   if(mpu_mode != sleepMode)
+    //   {
+    //     mpu_set_sleep();
+    //     mpu_mode = sleepMode;
+    //   }
+      
+    //   motion = false;
+      
+    // }
+    
+    // if(!motion)
+    // {
+    //    enter_sleep_wdt();
+    // }
+    // else
+    // {
+    //   _delay_ms(1000);
+    //   if(last_motion > 0) last_motion--; // reduce last_motion with every interrupt; after 60 seconds of no motion: turn lights off
+
+    // }
   }
   
 
@@ -199,17 +305,29 @@ bool check_for_darkness(bool ndarkness, uint16_t *nv_light)
 {
   uint16_t light_val;
 
+  // if braking is active: measuring light conditions is useless: assume it is dark
+  if(OCR0A == 255)
+  {
+    return ndarkness;
+  }
+
+  // if motion: wait for pulse to pass, then sample
+  if(motion & (TCNT0 < OCR0A))
+  {
+    while((TCNT0 < OCR0A));  
+  }
   // save satate of LED_PORT
   uint8_t temp = LED_DDR;
-  // disable LEDS
+   // disable LEDS
   LED_DDR &= ~(0x01 << LED);
-
   //get sample
   light_val = read_v_light();
 
+  LED_DDR = temp;
+
   *nv_light = light_val;
 
-  LED_DDR = temp;
+  
 
   if(!ndarkness && light_val > DARKNESS_THRESHHOLD_UPPER)
   {
@@ -237,7 +355,7 @@ void enter_sleep_wdt()
 
   // disable pins for adc
   DDRA &= ~(0xFE);
-  DDRB &= ~(0x0F);
+  DDRB &= ~(0x0C);
 
 
 
@@ -277,8 +395,8 @@ void setup_pins()
   DDRA = 0;
   DDRB = 0;
 
-  PORTA = 0xFF;
-  PORTB = 0x0F;
+  PORTA = 0xAE;   // set to pullup: A1, A2, A3, A5, A7
+  PORTB = 0x08;
 
 
   // debug pins: PB0 and PB1
@@ -314,6 +432,8 @@ void setup_pins()
 
 void setup_pwm()
 {
+
+  LED_DDR |= (0x01 << LED);
   // f_clk = 1e6 Hz
   // prescaler: 64
   // f_timer: 61 Hz
@@ -341,11 +461,40 @@ void disable_pwm()
   // disable timer in power reduction register
   PRR |= (0x01 << PRTIM0);
 
+  LED_DDR &= ~(0x01 << LED);
+
+}
+
+
+void setup_interrupt_pin()
+{
+  // clear Interrupt flag
+  GIFR |= (0x01 << PCIF0);
+  // enable interrupt on PCInt 1 Vector
+  GIMSK |= (0x01 << PCIE0);
+
+
+  PCMSK0 |= (0x01 << PCINT0);
+
+}
+
+
+void disable_interrupt_pin()
+{
+  GIMSK &= ~(0x01<< PCIE0);
+  PCMSK0 &= ~(0x01 << PCINT0);
 }
 
 
 bool mpu_set_register(uint8_t reg, uint8_t data)
 {
+
+  if(PRR & (0x01 << PRUSI))
+  {
+    // reactivate the USI interface:
+    PRR &= ~(0x01 << PRUSI);
+    _delay_ms(1);
+  }
   uint8_t msg[3] = {mpu_address | I2C_WRITE, reg, data};
 
   if(!usiTwiStartTransceiverWithData(msg, 3))
@@ -361,6 +510,12 @@ bool mpu_set_register(uint8_t reg, uint8_t data)
 
 bool mpu_set_registers(const uint8_t *reg, const uint8_t *data, uint8_t number)
 {
+  if(PRR & (0x01 << PRUSI))
+  {
+    // reactivate the USI interface:
+    PRR &= ~(0x01 << PRUSI);
+    _delay_ms(1);
+  }
   uint8_t i = 0;
   for(i = 0; i < number; i++)
   {
@@ -375,6 +530,12 @@ bool mpu_set_registers(const uint8_t *reg, const uint8_t *data, uint8_t number)
 
 bool mpu_get_registers(uint8_t reg, uint8_t *data, uint8_t number)
 {
+  if(PRR & (0x01 << PRUSI))
+  {
+    // reactivate the USI interface:
+    PRR &= ~(0x01 << PRUSI);
+    _delay_ms(1);
+  }
 
   uint8_t msg[number + 1];
   msg[0] = mpu_address | I2C_WRITE;
@@ -412,7 +573,14 @@ bool mpu_get_registers(uint8_t reg, uint8_t *data, uint8_t number)
 
 bool mpu_get_register(uint8_t reg, uint8_t* data)
 {
-    uint8_t msg[2] = {mpu_address | I2C_WRITE, reg};
+  if(PRR & (0x01 << PRUSI))
+  {
+    // reactivate the USI interface:
+    PRR &= ~(0x01 << PRUSI);
+    _delay_ms(1);
+  }
+  
+  uint8_t msg[2] = {mpu_address | I2C_WRITE, reg};
 
   if(usiTwiStartTransceiverWithData(msg, 2))
   {
@@ -487,7 +655,6 @@ bool mpu_set_sampling()
   return true;
 
   //everything seemed to work
-  return true;
 }
 
 bool mpu_set_sleep()
@@ -511,6 +678,13 @@ bool mpu_set_sleep()
 //doesn't use the mpu_get_register function
 bool mpu_read_regs(struct mpu_data *ret_data)
 {
+  if(PRR & (0x01 << PRUSI))
+  {
+    // reactivate the USI interface:
+    PRR &= ~(0x01 << PRUSI);
+    _delay_ms(1);
+  }
+
   uint8_t data[15];
   data[0] = mpu_address | 0;
   data[1] = 59;
@@ -614,7 +788,7 @@ uint16_t read_v_batt()
 
 uint16_t read_v_light()
 {
-  const uint8_t num_of_conversions = 10;
+  const uint8_t num_of_conversions = 5;
   uint8_t counter = 0;
   uint16_t data;
 
@@ -639,7 +813,7 @@ uint16_t read_v_light()
   //_delay_ms(1);
 
   // run 3 times num_of conversion to get sample-and-hold segment to current level: high impedance input signals
-  for(counter = 0; counter < num_of_conversions * 3; counter++){
+  for(counter = 0; counter < num_of_conversions/3; counter++){
     // start first conversion
     ADCSRA |= (0x01 << ADSC);
 
@@ -648,7 +822,7 @@ uint16_t read_v_light()
       asm volatile ("nop");
     }
     data = ADC;
-    _delay_us(3);
+    // _delay_us(2);
   }
   
   // read adc for at least 10 times
@@ -690,4 +864,14 @@ ISR(WDT_vect)
 
   if(last_motion > 0) last_motion--; // reduce last_motion with every interrupt; after 60 seconds of no motion: turn lights off
   sleep = false;
+}
+
+ISR(PCINT0_vect)
+{
+  if(ACC_INT_PIN & (0x01 << ACC_INT))
+  {
+    // pin rises
+    motion = true;
+    last_motion = MOTION_TIMEOUT;
+  }
 }
