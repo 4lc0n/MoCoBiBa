@@ -39,21 +39,6 @@
 
 
 
-#define I2C_READ 1
-#define I2C_WRITE 0
-
-struct mpu_data{
-  int16_t accel_x;
-  int16_t accel_y;
-  int16_t accel_z;
-  int16_t temp;
-  int16_t gyro_x;
-  int16_t gyro_y;
-  int16_t gyro_z;
-};
-
-
-const uint8_t mpu_address = 0x68 << 1;
 
 
 // definitions for configuration

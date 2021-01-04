@@ -23,53 +23,45 @@
 #include <util/delay.h>
 #include <stdint.h>
 #include <stdbool.h>
+
 #include "main.h"
 #include "usiTwiMaster.h"
+#include "mpu.h"
 
 
 
 
 
-// register in order to set to cycle and interrupt on accel_z // 105 was 57 (dunno why)
-const uint8_t lowpower_regs[8]  = {107, 108, 29,   56, 105,  31, 30, 107};      // only axis x activated, wake on motion activated, sampling at  4 Hz
-const uint8_t lowpower_data[8] = {   1,0x37,  5, 0x40,0xC0,0x0B,  4, 0x29};     // threshhold at reg 31
 
-// registers in order to set to sampling at 125 Hz, all 3 accel axes
-const uint8_t sampling_regs[9] = {107, 108, 28, 29,  56, 105,   31,  30, 107};   // wake on motion activated, sample-rate: 125, +-2g, gyro deactivated
-const uint8_t sampling_data[9] = {  1,0x07,  1,  0,0x40,0xC0, 0x0B,0x08, 0x09};  // disable 
 
-const uint8_t sleep_regs[3] = {108, 107, 107};
-const uint8_t sleep_data[3] = {0x3F, 0x08, 0x40};
+
 
 // variables determing current states:
 bool darkness = false;
+volatile uint8_t darkness_lp = 0;
 volatile bool motion = false;
+volatile uint8_t motion_lp = 0;
 volatile bool sleep = false;
 volatile uint8_t last_motion = 0;
+enum error_code {NO_ERROR, MPU_ERROR, BATTERY_ERROR};
+enum error_code error = NO_ERROR;
 
 
 uint16_t u16_v_light;
 enum modes {sleepMode, interruptMode, samplingMode};
 enum modes mpu_mode = sleepMode;
 // function declarations
-void setup_watchdog();
+void setup_watchdog(uint8_t wdtimeout);
 void setup_pins();
 void setup_pwm();
 void disable_pwm();
-void enter_sleep_wdt();
+void enter_sleep_wdt(uint8_t wdtimeout);
 void setup_interrupt_pin();
 void disable_interrupt_pin();
 
 bool check_for_darkness(bool ndarkness, uint16_t *nv_light);
 
-bool mpu_set_register(uint8_t reg, uint8_t data);
-bool mpu_get_register(uint8_t reg, uint8_t* data);
-bool mpu_set_registers(const uint8_t *reg, const uint8_t *data, uint8_t number);
-bool mpu_get_registers(uint8_t reg, uint8_t *data, uint8_t number);
-bool mpu_set_interrupt();
-bool mpu_set_sampling();
-bool mpu_set_sleep();
-bool mpu_read_regs(struct mpu_data *ret_data);
+
 uint16_t read_v_batt();
 uint16_t read_v_light();
 
@@ -79,21 +71,54 @@ int main()
 {
   uint8_t temp = 0;
   setup_pins();
-  setup_watchdog();
-  for(temp = 0; temp < 3; temp++){
+  setup_watchdog(WDTO_8S);
+  
+  _delay_ms(1000);
+ 
+  usiTwiMasterInitialize();
+  
+  if(!mpu_set_sleep() || !mpu_get_wai())
+  {
+    error = MPU_ERROR;
+    LED_PORT |= (0x01 << LED);
+    _delay_ms(500);
+    LED_PORT &= ~(0x01 << LED);
+    _delay_ms(100);
+  }
+  
+ for(temp = 0; temp < 3; temp++){
     LED_PORT |= (0x01 << LED);
     _delay_ms(100);
     LED_PORT &= ~(0x01 << LED);
     _delay_ms(100);
   }
-  _delay_ms(1000);
- 
-  usiTwiMasterInitialize();
-  mpu_set_sleep();
-  
- 
   while(1){
-    darkness = check_for_darkness(darkness, &u16_v_light);
+    if(check_for_darkness(darkness, &u16_v_light))
+    {
+      if(darkness_lp < 5)
+      {
+        darkness_lp++;
+      }
+
+      if(darkness_lp > 3) 
+      { // if last 3 samples were positive
+        darkness = true;
+      }
+      
+    }
+    else
+    {
+      if(darkness_lp > 0)
+      {
+        darkness_lp --;
+      }
+      if(darkness_lp == 0)
+      {
+        darkness = false;
+      }
+    }
+    
+
     
     if(darkness)
             DEBUG1_PORT |= (0x01 << DEBUG1);
@@ -103,7 +128,7 @@ int main()
     {
       
 
-      if(mpu_mode != samplingMode)
+      if(mpu_mode != samplingMode && !(error == MPU_ERROR))
       {
         usiTwiMasterInitialize();
         if(!mpu_set_sampling())
@@ -123,8 +148,9 @@ int main()
         // timed out: no motion in last 60 sec
         motion = false;
         disable_pwm();
+        motion_lp = 0;
       }      
-
+      // TODO: implement sampling and filetring as q15
       // sample the mpu
 
       // interprete data with a lpfilter
@@ -149,7 +175,7 @@ int main()
       {
         setup_interrupt_pin();
         // if mpu not configured yet
-        if(mpu_mode != interruptMode)
+        if(mpu_mode != interruptMode && !(error == MPU_ERROR))
         {
           usiTwiMasterInitialize();
           if(!mpu_set_interrupt())
@@ -164,7 +190,7 @@ int main()
         // sleep for 1 ms
         else
         {
-          enter_sleep_wdt();
+          enter_sleep_wdt(WDTO_1S);
         }
       }
 
@@ -172,7 +198,7 @@ int main()
       else
       {
         disable_interrupt_pin();
-        if(mpu_mode != sleepMode)
+        if(mpu_mode != sleepMode&& !(error == MPU_ERROR))
         {
           usiTwiMasterInitialize();
           if(!mpu_set_sleep())
@@ -184,119 +210,24 @@ int main()
         }
 
         // sleep for 1 ms
-        enter_sleep_wdt();
+        enter_sleep_wdt(WDTO_8S);
 
       }
     }
-    
-
-
-    // if(darkness)
-    // {
-    //   // if motion is set to true: sample should already be configured
-    //   if(motion)
-    //   {
-    //     // 
-    //     if(ACC_INT_PIN & (0x01 << ACC_INT))
-    //     {
-    //       last_motion = 60;   // reset last_motion to 60 -> 1 minute timer, reduced by WDT
-          
-    //     }
-              
-
-    //     // sample the mpu
-
-    //     // interprete data with a lpfilter
-
-    //     // modify timer to either signal braking light or normal light
-    //     // led pin: OC0A
-
-    //     // if breaking: 
-    //     // OCR0A = 255;
-
-    //     // else:
-    //      OCR0A = 60;
-
-
-    //     if(!last_motion)
-    //     {
-    //       motion = false;
-    //       mpu_mode = interruptMode;
-    //       mpu_set_interrupt();
-    //       disable_pwm();
-    //       LED_DDR &= ~(0x01 << LED);
-    //     }
-    //   }
-
-
-    //   // else: motion is false, it is only dark: set interrupt
-    //   // if motion: go to upper part
-    //   else {    // motion
-    //     // if interrupt not set
-    //     if(mpu_mode != interruptMode)
-    //     {
-    //       mpu_set_interrupt();
-    //       mpu_mode = interruptMode;
-    //     }
-        
-    //     // if interrupt pin reads as one
-    //     if(ACC_INT_PIN & (0x01 << ACC_INT))
-    //     {
-
-
-    //       // set motion to true
-    //       motion = true;
-    //       // activate mpu to sample at 80 Hz
-    //       mpu_mode = samplingMode;
-    //       mpu_set_sampling();
-    //       last_motion = 60;
-
-    //       // enable led 
-    //       // todo: implement timer for pwm
-    //       setup_pwm();
-    //       LED_DDR |= (0x01 << LED);
-    //     }
-        
-        
-    //   }
-    // }
-    // else
-    // {
-    //   if(mpu_mode != sleepMode)
-    //   {
-    //     mpu_set_sleep();
-    //     mpu_mode = sleepMode;
-    //   }
-      
-    //   motion = false;
-      
-    // }
-    
-    // if(!motion)
-    // {
-    //    enter_sleep_wdt();
-    // }
-    // else
-    // {
-    //   _delay_ms(1000);
-    //   if(last_motion > 0) last_motion--; // reduce last_motion with every interrupt; after 60 seconds of no motion: turn lights off
-
-    // }
   }
-  
-
-
 }
 
-void setup_watchdog()
+void setup_watchdog(uint8_t wdtimeout)
 {
-  // set prescaler to timeout of 1 sec
+  // set prescaler to timeout of wdtimeout seconds
   // set to generate interrupt instead of reset
   cli();
   wdt_reset();
   MCUSR &= ~(0x01 << WDRF);
+  WDTCSR = 0;
   WDTCSR |= (0x01 << WDCE) | (0x01 << WDE);
   WDTCSR |=   (0x00 << WDP3) | (0x01 << WDP2) | (0x01 << WDP1) | (0x00 << WDP0);
+  WDTCSR |= wdtimeout;
   WDTCSR |= (0x01 << WDIE);
   sei();
 }
@@ -349,8 +280,9 @@ bool check_for_darkness(bool ndarkness, uint16_t *nv_light)
   
 }
 
-void enter_sleep_wdt()
+void enter_sleep_wdt(uint8_t wdtimeout)
 {
+  setup_watchdog(wdtimeout);
   sleep = true;
 
   // disable pins for adc
@@ -389,7 +321,7 @@ void enter_sleep_wdt()
 
 void setup_pins()
 {
-
+  cli();
 
   // set all unconnected pins to a defined level: input, pullup
   DDRA = 0;
@@ -425,7 +357,10 @@ void setup_pins()
   V_SINK_DDR &= ~(0x01 << V_SINK);
   V_SINK_PORT &= ~(0x01 << V_SINK);
 
-  
+
+  // clear interrupt flag for PCINT0
+  GIFR |= (0x01 << PCIF0);
+  sei();
 
 }
 
@@ -486,236 +421,7 @@ void disable_interrupt_pin()
 }
 
 
-bool mpu_set_register(uint8_t reg, uint8_t data)
-{
 
-  if(PRR & (0x01 << PRUSI))
-  {
-    // reactivate the USI interface:
-    PRR &= ~(0x01 << PRUSI);
-    _delay_ms(1);
-  }
-  uint8_t msg[3] = {mpu_address | I2C_WRITE, reg, data};
-
-  if(!usiTwiStartTransceiverWithData(msg, 3))
-  {
-       //failed to transmit
-    return false;
-  }
-  
-  return true;
-
-}
-
-
-bool mpu_set_registers(const uint8_t *reg, const uint8_t *data, uint8_t number)
-{
-  if(PRR & (0x01 << PRUSI))
-  {
-    // reactivate the USI interface:
-    PRR &= ~(0x01 << PRUSI);
-    _delay_ms(1);
-  }
-  uint8_t i = 0;
-  for(i = 0; i < number; i++)
-  {
-    if(!mpu_set_register(reg[i], data[i]))
-    {
-      return false;
-    }
-    _delay_us(10);
-  }
-  return true;
-}
-
-bool mpu_get_registers(uint8_t reg, uint8_t *data, uint8_t number)
-{
-  if(PRR & (0x01 << PRUSI))
-  {
-    // reactivate the USI interface:
-    PRR &= ~(0x01 << PRUSI);
-    _delay_ms(1);
-  }
-
-  uint8_t msg[number + 1];
-  msg[0] = mpu_address | I2C_WRITE;
-  msg[1] = reg;
-
-  //transmit reg to read from
-  if(usiTwiStartTransceiverWithData(msg, 2))
-  {
-    _delay_us(50);
-  }
-  else{     //failed to transmit
-    return false;
-  }
-
-  msg[0] = mpu_address | I2C_READ;
-  // read from MPU
-  if(usiTwiStartTransceiverWithData(msg, number + 1))
-  {
-    uint8_t i;
-    for(i = 0; i < number; i++)
-    {
-      data[i] = msg[i + 1];
-    }
-
-    return true;
-  }
-  else
-  {
-    return false;
-  }
-
-  return true;
-}
-
-
-bool mpu_get_register(uint8_t reg, uint8_t* data)
-{
-  if(PRR & (0x01 << PRUSI))
-  {
-    // reactivate the USI interface:
-    PRR &= ~(0x01 << PRUSI);
-    _delay_ms(1);
-  }
-  
-  uint8_t msg[2] = {mpu_address | I2C_WRITE, reg};
-
-  if(usiTwiStartTransceiverWithData(msg, 2))
-  {
-    _delay_us(50);
-  }
-  else{     //failed to transmit
-    return false;
-  }
-
-  msg[0] = mpu_address | I2C_READ;
-  
-
-  if(usiTwiStartTransceiverWithData(msg, 2))
-  {
-    *data = msg[1];
-    return true;
-  }
-  else
-  {
-    *data = 0;
-    return false;
-  }
-}
-
-
-
-bool mpu_set_interrupt()
-{
-  
-  //reset MPU unit
-  mpu_set_register(107, 0x80);
-  _delay_ms(100);
-  
-  
-  if(mpu_set_registers(lowpower_regs, lowpower_data, sizeof(lowpower_regs)))
-  {
-    return true;
-  }
-  else
-  {
-    return false;
-  }
-  
-  
-}
-
-
-
-bool mpu_set_sampling()
-{
-  //reset MPU unit
-  mpu_set_register(107, 0x80);
-  _delay_ms(100);
-
-  // for(uint8_t i = 0; i < 9; i++)
-  // {
-  //   if(!mpu_set_register(sampling_regs[i], sampling_data[i]))
-  //   {
-  //     //failed to transmit
-  //     return false;
-  //   }
-  //   else{
-  //     //wait for a short period of time to distinquish the data packets on the logic analyzer
-  //     _delay_us(100);
-  //   }
-  // }
-
-  if(!mpu_set_registers(sampling_regs, sampling_data, sizeof(sampling_regs)))
-  {
-    return false;
-  }
-  return true;
-
-  //everything seemed to work
-}
-
-bool mpu_set_sleep()
-{
-    mpu_set_register(107, 0x80);
-  _delay_ms(100);
-
-  // sets the MPU in sleep mode, deactivates all sensors
-  if(!mpu_set_registers(sleep_regs, sleep_data, sizeof(sleep_regs)))
-  {
-    return false;
-  }
-  else{
-    return true;
-  }
-}
-
-
-//read data from regs 59 to 72 and pass back a struct
-//using the fast way, read 14 registers at once
-//doesn't use the mpu_get_register function
-bool mpu_read_regs(struct mpu_data *ret_data)
-{
-  if(PRR & (0x01 << PRUSI))
-  {
-    // reactivate the USI interface:
-    PRR &= ~(0x01 << PRUSI);
-    _delay_ms(1);
-  }
-
-  uint8_t data[15];
-  data[0] = mpu_address | 0;
-  data[1] = 59;
-  //indicate at which address to start reading
-  if(usiTwiStartTransceiverWithData(data, 2))
-  {
-    return false;
-  }
-
-  data[0] = mpu_address | I2C_READ;
-
-  //read 14 regs at once
-  if(!usiTwiStartTransceiverWithData(data, 15))
-  {
-    return false;
-  }
-
-
-  ret_data->accel_x = data[1] << 8 | data[2];
-  ret_data->accel_y = data[3] << 8 | data[4];
-  ret_data->accel_z = data[5] << 8 | data[6];
-
-  ret_data->temp = data[7] << 8 | data[8];
-
-  ret_data->gyro_x = data[9] << 8 | data[10];
-  ret_data->gyro_y = data[11] << 8 | data[12];
-  ret_data->gyro_z = data[13] << 8 | data[14];
-
-  return true;
-
-}
 
 
 uint16_t read_v_batt()
@@ -738,9 +444,10 @@ uint16_t read_v_batt()
   ADCSRA &= ~(0x07);    // clear prescaler setting
   ADCSRA |= (0x04);
 
-  // select voltage reference: VCC (ADMUX [7:6] = 0)
+  // select voltage reference: 1.1 voltage reference (ADMUX [7:6] = 2)
   // select adc channel: ADC1 (ADMUX[5:0] = 1)
-  ADMUX = 0x00 | 0x01;
+  ADMUX = 0;
+  ADMUX = (0x01 << REFS1) | 0x01;
   
   // wait for 1 ms to let the resistor cicruit settle in
   _delay_ms(1);
@@ -871,7 +578,17 @@ ISR(PCINT0_vect)
   if(ACC_INT_PIN & (0x01 << ACC_INT))
   {
     // pin rises
-    motion = true;
-    last_motion = MOTION_TIMEOUT;
+    if(motion_lp < 5)
+    {
+      motion_lp ++;
+    }
+    // if 3 times positive
+    if(motion_lp > 2)
+    {
+      motion = true;
+      last_motion = MOTION_TIMEOUT;
+    }
+    
+    
   }
 }
